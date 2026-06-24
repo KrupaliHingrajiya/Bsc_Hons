@@ -1,0 +1,150 @@
+-- ALTER, RENAME, DELETE, TRUNCATE and DROP
+-- Part - A:
+
+-- 1.Add STATE column in DEPOSIT table.
+ALTER TABLE DEPOSIT
+ADD STATE VARCHAR(20);
+
+-- 2.Add CITY column in DEPOSIT table.
+ALTER TABLE DEPOSIT
+ADD CITY VARCHAR(20);
+
+-- Add PINCODE column in DEPOSIT table.
+ALTER TABLE DEPOSIT
+ADD PINCODE INT;
+
+-- 3.Change size of CNAME column to VARCHAR(35).
+ALTER TABLE DEPOSIT
+ALTER COLUMN CNAME VARCHAR(35);
+
+-- 4.Change datatype of AMOUNT column to INT.
+ALTER TABLE DEPOSIT
+ALTER COLUMN AMOUNT INT;
+
+-- 5.Delete CITY column from DEPOSIT table.
+ALTER TABLE DEPOSIT
+DROP COLUMN CITY;
+
+-- 6.Rename ACTNO column to ANO.
+EXEC sp_rename 'DEPOSIT.ACTNO', 'ANO', 'COLUMN';
+
+-- 7.Rename BNAME column to BRANCH_NAME.
+EXEC sp_rename 'DEPOSIT.BNAME', 'BRANCH_NAME', 'COLUMN';
+
+-- 8.Rename DEPOSIT table to DEPOSIT_DETAIL.
+EXEC sp_rename 'DEPOSIT', 'DEPOSIT_DETAIL';
+
+-- 9.Add IFSC_CODE column in DEPOSIT_DETAIL table.
+ALTER TABLE DEPOSIT_DETAIL
+ADD IFSC_CODE VARCHAR(15);
+
+-- 10.Change size of BRANCH_NAME column to VARCHAR(30).
+ALTER TABLE DEPOSIT_DETAIL
+ALTER COLUMN BRANCH_NAME VARCHAR(30);
+
+-- Part - B:
+
+-- 11.Rename ADATE column to AOPENDATE.
+EXEC sp_rename 'DEPOSIT_DETAIL.ADATE', 'AOPENDATE', 'COLUMN';
+
+-- 12.Delete AOPENDATE column.
+ALTER TABLE DEPOSIT_DETAIL
+DROP COLUMN AOPENDATE;
+
+-- 13.Rename CNAME column to CUSTOMER_NAME.
+EXEC sp_rename 'DEPOSIT_DETAIL.CNAME', 'CUSTOMER_NAME', 'COLUMN';
+
+-- 14.Add COUNTRY column.
+ALTER TABLE DEPOSIT_DETAIL
+ADD COUNTRY VARCHAR(20);
+
+-- 15.Add ACCOUNT_TYPE column.
+ALTER TABLE DEPOSIT_DETAIL
+ADD ACCOUNT_TYPE VARCHAR(15);
+
+-- Part - C:
+
+-- 16.Change datatype of PINCODE column to BIGINT.
+ALTER TABLE DEPOSIT_DETAIL
+ALTER COLUMN PINCODE BIGINT;
+
+-- 17.Delete ACCOUNT_TYPE column.
+ALTER TABLE DEPOSIT_DETAIL
+DROP COLUMN ACCOUNT_TYPE;
+
+-- 18.Rename AMOUNT column to BALANCE.
+EXEC sp_rename 'DEPOSIT_DETAIL.AMOUNT', 'BALANCE', 'COLUMN';
+
+-- 19.Add STATUS column.
+ALTER TABLE DEPOSIT_DETAIL
+ADD STATUS VARCHAR(10);
+
+-- 20.Rename DEPOSIT_DETAIL table to BANK_DEPOSIT.
+EXEC sp_rename 'DEPOSIT_DETAIL', 'BANK_DEPOSIT';
+
+-- DELETE Queries
+-- Part - A:
+
+-- 1.Delete records from DEPOSIT table where amount is less than or equal to 3000.
+DELETE FROM DEPOSIT
+WHERE AMOUNT <= 3000;
+
+-- 2.Delete records from DEPOSIT table where branch name is BEDI.
+DELETE FROM DEPOSIT
+WHERE BNAME = 'BEDI';
+
+-- 3.Delete records where account number is between 102 and 109.
+DELETE FROM DEPOSIT
+WHERE ACTNO > 102
+AND ACTNO < 109;
+
+-- 4.Delete records where branch name is BEDI or MADHAPAR.
+DELETE FROM DEPOSIT
+WHERE BNAME IN ('BEDI', 'MADHAPAR');
+
+-- 5.Delete record where amount is 8000 and date is greater than 01-01-2025.
+DELETE FROM DEPOSIT
+WHERE AMOUNT = 8000
+AND ADATE > '2025-01-01';
+
+-- 6.Delete records where branch name is NULL.
+DELETE FROM DEPOSIT
+WHERE BNAME IS NULL;
+
+-- 7.Delete CHARMI record from SHITAL PARK branch with amount 7000.
+DELETE FROM DEPOSIT
+WHERE CNAME = 'CHARMI'
+AND BNAME = 'SHITAL PARK'
+AND AMOUNT = 7000;
+
+-- 8.Delete all records from DEPOSIT table.
+DELETE FROM DEPOSIT;
+
+-- 9.Delete all records using TRUNCATE command.
+TRUNCATE TABLE DEPOSIT;
+
+-- 10.Delete DEPOSIT table permanently.
+DROP TABLE DEPOSIT;
+
+-- Part - B:
+
+-- 11.Delete students whose ID is greater than 105.
+DELETE FROM STUDENT
+WHERE STDID > 105;
+
+-- 12.Delete students whose branch is NULL and name is not NULL.
+DELETE FROM STUDENT
+WHERE BRANCH IS NULL
+AND SNAME IS NOT NULL;
+
+-- 13.Delete students whose SPI is less than 9 and city is RAJKOT.
+DELETE FROM STUDENT
+WHERE SPI < 9
+AND CITY = 'RAJKOT';
+
+-- 14.Delete students whose branch is not NULL.
+DELETE FROM STUDENT
+WHERE BRANCH IS NOT NULL;
+
+-- 15.Delete all student records using TRUNCATE command.
+TRUNCATE TABLE STUDENT;
