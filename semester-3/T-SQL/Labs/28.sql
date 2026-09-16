@@ -1,0 +1,469 @@
+CREATE TABLE EMPLOYEE
+(
+    EID INT,
+    FIRSTNAME VARCHAR(50),
+    LASTNAME VARCHAR(50),
+    DEPARTMENT VARCHAR(50),
+    SALARY DECIMAL(9,2),
+    CITY VARCHAR(50),
+    GENDER VARCHAR(50),
+    JOININGYEAR INT
+)
+
+INSERT INTO EMPLOYEE
+VALUES 
+(101,'HETVI','PATEL','ADMIN',12000.00,'RAJKOT','FEMALE',2026),
+(102,'RAJ','MEHTA','IT',14000.00,'AHMEDABAD','MALE',2022),
+(103,'VISHAL','SHARMA','HR',15000.00,'BARODA','MALE',2020),
+(104,'DEEP','PATEL','ADMIN',12500.00,'RAJKOT','MALE',2026),
+(105,'DHAVAL','SHAH','IT',14000.00,'JAMNAGAR','MALE',2024),
+(106,'RIYA','KAUR','IT',5000.00,'AHMEDABAD','FEMALE',2024),
+(107,'PARAG','PANDYA','HR',7000.00,'RAJKOT','MALE',2025),
+(108,'VRUNDA','VYAS','SERVER',10000.00,'BARODA','FEMALE',2022),
+(109,'MEHUL','SINGH','HR',12000.00,'MORBI','MALE',2020),
+(110,'MUBIN','PARMAR','TRANSPOT',12000.00,'SURAT','MALE',2021)
+
+INSERT INTO EMPLOYEE
+(EID,FIRSTNAME,LASTNAME,DEPARTMENT,SALARY,GENDER,JOININGYEAR)
+VALUES
+(111,'MAYANK','PUROHIT','ACCOUNT',13000.00,'MALE',2020)
+
+SELECT * FROM EMPLOYEE
+
+
+
+-- PART A
+
+
+-- 1. Trigger for printing message after employee record insertion
+
+CREATE OR ALTER TRIGGER TRG_EMPLOYEE_INSERT
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    PRINT 'Employee record inserted successfully.'
+END
+
+
+
+-- 2. Trigger for printing message after employee record update
+
+CREATE OR ALTER TRIGGER TRG_EMPLOYEE_UPDATE
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    PRINT 'Employee record updated successfully.'
+END
+
+
+
+-- 3. Trigger for printing message after employee record deletion
+
+CREATE OR ALTER TRIGGER TRG_EMPLOYEE_DELETE
+ON EMPLOYEE
+AFTER DELETE
+AS
+BEGIN
+    PRINT 'Employee record deleted successfully.'
+END
+
+
+
+-- 4. Trigger for printing message after employee salary increment
+
+CREATE OR ALTER TRIGGER TRG_SALARY_INCREMENT
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    IF UPDATE(SALARY)
+    BEGIN
+        PRINT 'Employee salary updated successfully.'
+    END
+END
+
+
+
+-- 5. Trigger for converting CITY into uppercase during insertion
+
+CREATE OR ALTER TRIGGER TRG_CITY_UPPERCASE
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    UPDATE E
+    SET CITY = UPPER(E.CITY)
+    FROM EMPLOYEE E
+    INNER JOIN inserted I
+    ON E.EID = I.EID
+    WHERE E.CITY IS NOT NULL
+END
+
+
+
+-- PART B
+
+
+-- 6. Trigger for updating employee city and printing old and new city
+
+CREATE OR ALTER TRIGGER TRG_CITY_UPDATE
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    IF UPDATE(CITY)
+    BEGIN
+        SELECT
+            D.EID,
+            D.CITY AS OLD_CITY,
+            I.CITY AS NEW_CITY
+        FROM deleted D
+        INNER JOIN inserted I
+        ON D.EID = I.EID
+    END
+END
+
+
+
+-- 7. Trigger for setting CITY as RAJKOT if no city is entered
+
+CREATE OR ALTER TRIGGER TRG_DEFAULT_CITY
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    UPDATE E
+    SET CITY = 'RAJKOT'
+    FROM EMPLOYEE E
+    INNER JOIN inserted I
+    ON E.EID = I.EID
+    WHERE E.CITY IS NULL
+END
+
+
+
+-- 8. Trigger for adding current year in JOININGYEAR if NULL
+
+CREATE OR ALTER TRIGGER TRG_DEFAULT_JOININGYEAR
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    UPDATE E
+    SET JOININGYEAR = YEAR(GETDATE())
+    FROM EMPLOYEE E
+    INNER JOIN inserted I
+    ON E.EID = I.EID
+    WHERE E.JOININGYEAR IS NULL
+END
+
+
+
+-- 9. Trigger for printing employee full name after insertion
+
+CREATE OR ALTER TRIGGER TRG_PRINT_FULLNAME
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    SELECT
+        FIRSTNAME + ' ' + LASTNAME AS FULLNAME
+    FROM inserted
+END
+
+
+
+-- 10. Trigger for assigning GENERAL department if NULL
+
+CREATE OR ALTER TRIGGER TRG_DEFAULT_DEPARTMENT
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    UPDATE E
+    SET DEPARTMENT = 'GENERAL'
+    FROM EMPLOYEE E
+    INNER JOIN inserted I
+    ON E.EID = I.EID
+    WHERE E.DEPARTMENT IS NULL
+END
+
+
+
+-- PART C
+
+
+-- Create EMPLOYEE_UPDATE_LOG table
+
+CREATE TABLE EMPLOYEE_UPDATE_LOG
+(
+    LOGID INT IDENTITY(1,1),
+    EID INT,
+    OLDSALARY DECIMAL(9,2),
+    NEWSALARY DECIMAL(9,2),
+    OLDDEPARTMENT VARCHAR(50),
+    NEWDEPARTMENT VARCHAR(50),
+    UPDATEDATE DATETIME
+)
+
+
+
+-- Create EMPLOYEE_INSERT_LOG table
+
+CREATE TABLE EMPLOYEE_INSERT_LOG
+(
+    LOGID INT IDENTITY(1,1),
+    EID INT,
+    FIRSTNAME VARCHAR(50),
+    LASTNAME VARCHAR(50),
+    DEPARTMENT VARCHAR(50),
+    SALARY DECIMAL(9,2),
+    CITY VARCHAR(50),
+    GENDER VARCHAR(50),
+    JOININGYEAR INT,
+    INSERTDATE DATETIME
+)
+
+
+
+-- Create NAME_CHANGE_LOG table
+
+CREATE TABLE NAME_CHANGE_LOG
+(
+    LOGID INT IDENTITY(1,1),
+    EID INT,
+    OLDFIRSTNAME VARCHAR(50),
+    NEWFIRSTNAME VARCHAR(50),
+    INSERTDATE DATETIME
+)
+
+
+
+-- Create CITY_UPDATE_LOG table
+
+CREATE TABLE CITY_UPDATE_LOG
+(
+    LOGID INT IDENTITY(1,1),
+    EID INT,
+    OLDCITY VARCHAR(50),
+    NEWCITY VARCHAR(50),
+    UPDATEDATE DATETIME
+)
+
+
+
+-- 11. Store updated employee details in EMPLOYEE_UPDATE_LOG
+
+CREATE OR ALTER TRIGGER TRG_EMPLOYEE_UPDATE_LOG
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    INSERT INTO EMPLOYEE_UPDATE_LOG
+    (
+        EID,
+        OLDSALARY,
+        NEWSALARY,
+        OLDDEPARTMENT,
+        NEWDEPARTMENT,
+        UPDATEDATE
+    )
+    SELECT
+        D.EID,
+        D.SALARY,
+        I.SALARY,
+        D.DEPARTMENT,
+        I.DEPARTMENT,
+        GETDATE()
+    FROM deleted D
+    INNER JOIN inserted I
+    ON D.EID = I.EID
+END
+
+
+
+-- 12. Store newly inserted employee details in EMPLOYEE_INSERT_LOG
+
+CREATE OR ALTER TRIGGER TRG_EMPLOYEE_INSERT_LOG
+ON EMPLOYEE
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO EMPLOYEE_INSERT_LOG
+    (
+        EID,
+        FIRSTNAME,
+        LASTNAME,
+        DEPARTMENT,
+        SALARY,
+        CITY,
+        GENDER,
+        JOININGYEAR,
+        INSERTDATE
+    )
+    SELECT
+        EID,
+        FIRSTNAME,
+        LASTNAME,
+        DEPARTMENT,
+        SALARY,
+        CITY,
+        GENDER,
+        JOININGYEAR,
+        GETDATE()
+    FROM inserted
+END
+
+
+
+-- 13. Store old and new FIRSTNAME values after name update
+
+CREATE OR ALTER TRIGGER TRG_NAME_CHANGE_LOG
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    IF UPDATE(FIRSTNAME)
+    BEGIN
+        INSERT INTO NAME_CHANGE_LOG
+        (
+            EID,
+            OLDFIRSTNAME,
+            NEWFIRSTNAME,
+            INSERTDATE
+        )
+        SELECT
+            D.EID,
+            D.FIRSTNAME,
+            I.FIRSTNAME,
+            GETDATE()
+        FROM deleted D
+        INNER JOIN inserted I
+        ON D.EID = I.EID
+    END
+END
+
+
+
+-- 14. Store old and new CITY details after city update
+
+CREATE OR ALTER TRIGGER TRG_CITY_UPDATE_LOG
+ON EMPLOYEE
+AFTER UPDATE
+AS
+BEGIN
+    IF UPDATE(CITY)
+    BEGIN
+        INSERT INTO CITY_UPDATE_LOG
+        (
+            EID,
+            OLDCITY,
+            NEWCITY,
+            UPDATEDATE
+        )
+        SELECT
+            D.EID,
+            D.CITY,
+            I.CITY,
+            GETDATE()
+        FROM deleted D
+        INNER JOIN inserted I
+        ON D.EID = I.EID
+    END
+END
+
+
+
+-- 15. INSTEAD OF INSERT trigger to remove extra spaces
+-- from FIRSTNAME and LASTNAME
+
+CREATE OR ALTER TRIGGER TRG_REMOVE_SPACES
+ON EMPLOYEE
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO EMPLOYEE
+    (
+        EID,
+        FIRSTNAME,
+        LASTNAME,
+        DEPARTMENT,
+        SALARY,
+        CITY,
+        GENDER,
+        JOININGYEAR
+    )
+    SELECT
+        EID,
+        LTRIM(RTRIM(FIRSTNAME)),
+        LTRIM(RTRIM(LASTNAME)),
+        DEPARTMENT,
+        SALARY,
+        CITY,
+        GENDER,
+        JOININGYEAR
+    FROM inserted
+END
+
+
+
+-- TESTING
+
+
+-- Test INSERT
+
+INSERT INTO EMPLOYEE
+VALUES
+(112,'  JOHN  ','  PATEL  ','IT',15000,'rajkot','MALE',NULL)
+
+SELECT * FROM EMPLOYEE
+
+
+
+-- Test CITY UPDATE
+
+UPDATE EMPLOYEE
+SET CITY = 'AHMEDABAD'
+WHERE EID = 101
+
+
+
+-- Test SALARY UPDATE
+
+UPDATE EMPLOYEE
+SET SALARY = SALARY + 2000
+WHERE EID = 101
+
+
+
+-- Test NAME UPDATE
+
+UPDATE EMPLOYEE
+SET FIRSTNAME = 'HETVI'
+WHERE EID = 101
+
+
+
+-- Check EMPLOYEE_UPDATE_LOG
+
+SELECT * FROM EMPLOYEE_UPDATE_LOG
+
+
+
+-- Check EMPLOYEE_INSERT_LOG
+
+SELECT * FROM EMPLOYEE_INSERT_LOG
+
+
+
+-- Check NAME_CHANGE_LOG
+
+SELECT * FROM NAME_CHANGE_LOG
+
+
+
+-- Check CITY_UPDATE_LOG
+
+SELECT * FROM CITY_UPDATE_LOG
